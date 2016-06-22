@@ -24,6 +24,8 @@ $scriptname = $ENV{ 'SCRIPT_FILENAME' };
 $slash = "\\";
 $aktdir = holpfad0($scriptname);
 
+use sniver;
+
 #print "Content-type: text/html\n\n";
 #print "<html>\n<head>\n<title>Test</title>\n</head>\n<body>\n";
 #print "<p>scriptname=[$scriptname]</p>\n";
@@ -47,6 +49,10 @@ print PrintHeader();
 $head = UbmCgiHead("takefile - uebergebenes File annehmen");  ##  - Thomas Hofmann; Jun 2016
 print $head;
 
+my @pararr = ();
+my $onepar = undef;
+my $datetime = getdatetime(1);
+my $par = undef;
 $aktkat = 1;
 $input="";
 @input=();
@@ -58,12 +64,40 @@ if (ReadParse(*input)) {
 	if ($input{'kat'}) {
 		$aktkat = $input{'kat'};
 	}
+	if ($input{'1'}) {
+		$onepar = $input{'1'};
+	} elsif ( @input ) {
+		@pararr = @input;
+	}
+	if ( ($input) and $input !~ /[\&;]/ ) {
+		$par = $input;
+		$par =~ s/%(..)/pack("c",hex($1))/ges;
+	}
 }
 
-
 #print "<hr><pre>\n";
-&printHash(%globals);
+#&printHash(%globals);
 #print "</pre><hr>\n";
+
+print "<hr><pre>\n";
+&printHash(%input);
+print "</pre><hr>\n";
+
+print webtag( "received at: $datetime");
+print webtag( "count keys: " . @{ keys( %input ) } );
+my $siconepar = $onepar;
+$siconepar =~ s/</\&lt;/gs;
+print webtag( 'pre', "--[$siconepar]--" );
+
+print "<hr><pre>\n";
+&printArray(@input);
+print "</pre><hr>\n";
+
+my $sicpar = $par;
+$sicpar =~ s/</\&lt;/gs;
+print webtag( "pre", "par: $sicpar" );
+
+
 
 print "</html>\n";
 exit(0);
